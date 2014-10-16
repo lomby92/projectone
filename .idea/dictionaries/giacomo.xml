@@ -2,6 +2,8 @@
   <dictionary name="giacomo">
     <words>
       <w>myapp</w>
+      <w>onreadystatechange</w>
+      <w>xmlhttp</w>
     </words>
   </dictionary>
 </component>
