@@ -9,10 +9,3 @@ class Accelerometer(models.Model):
     value_x = models.FloatField(default=0)
     value_y = models.FloatField(default=0)
     value_z = models.FloatField(default=-1)
-
-    def create(self, x, y, z, g):
-
-        self.value_x = x
-        self.value_y = y
-        self.value_z = z
-        self.max_g = g

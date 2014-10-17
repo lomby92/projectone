@@ -7,26 +7,33 @@
 <body>
     <script type="text/javascript">
         var xmlhttp = new XMLHttpRequest();
-        var url = "accelerometer_json";
+        var url = "get_csv/";
 
         xmlhttp.onreadystatechange = function() {
+            var x_value, y_value, z_value, max_g;
             if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
                 try{
-                    var obj = JSON.parse(xmlhttp.toString());
-                    var x_value = obj.x;
+                    var allText = xmlhttp.responseText;
+                    var arrayText = allText.split(",");
+                    console.log(arrayText.length)
+                    for(i=0;i<arrayText.length;i++){
+                        console.log(arrayText[i])
+                    }
                 }catch(e){
                     console.log(e);
-                    var x_value = 0;
                 }
 
-                myFunction(x_value);
+                //myFunction(x_value, y_value, z_value, max_g);
             }
         }
         xmlhttp.open("GET", url, true);
         xmlhttp.send();
 
-        function myFunction(x_value) {
-            console.log(x_value.toString());
+        function myFunction(x, y, z, g) {
+            console.log(x);
+            console.log(y);
+            console.log(z);
+            console.log(g);
         }
     </script>
 </body>

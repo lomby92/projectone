@@ -1,9 +1,9 @@
-import json
+import djqscsv
 
-from django.http import HttpResponse
 from django.views import generic
 
-from myapp.models import Accelerometer
+from models import Accelerometer
+from utils import save_csv
 
 
 class AccelerometerView(generic.base.TemplateView):
@@ -21,6 +21,11 @@ class HomeView(generic.base.TemplateView):
     template_name = "myapp/home.html"
 
 
-def accelerometer_json(request):
-    data = {"x":"zero"}
-    return HttpResponse(data, content_type='application/json')
+def get_csv(request):
+    save_csv()
+    last_set = None
+    try:
+        last_set = Accelerometer.objects.order_by('-id').first()
+    except:
+        pass
+    return djqscsv.render_to_csv_response(last_set)
