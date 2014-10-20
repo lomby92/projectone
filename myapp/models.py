@@ -3,7 +3,7 @@ from django.db import models
 
 class Accelerometer(models.Model):
 
-    MAX_VALUE_OF_SENSOR = 32767
+    MAX_VALUE_OF_SENSOR = 32767.0
 
     max_g = models.FloatField(default=2)
     value_x = models.FloatField(default=0)

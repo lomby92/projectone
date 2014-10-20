@@ -3,7 +3,7 @@ import djqscsv
 from django.views import generic
 
 from models import Accelerometer
-from utils import save_csv
+from utils import create_accelerometer_value
 
 
 class AccelerometerView(generic.base.TemplateView):
@@ -21,11 +21,14 @@ class HomeView(generic.base.TemplateView):
     template_name = "myapp/home.html"
 
 
-def get_csv(request):
-    save_csv()
+def get_accelerometer_csv(request):
+    # now create a random accelerometer values
+    create_accelerometer_value()
+    # elaborate request
     last_set = None
     try:
-        last_set = Accelerometer.objects.order_by('-id').first()
+        qs = Accelerometer.objects.order_by('id')
+        last_set = qs.all().reverse()[:1]
     except:
         pass
     return djqscsv.render_to_csv_response(last_set)

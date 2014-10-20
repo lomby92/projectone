@@ -2,9 +2,9 @@ from django.conf.urls import patterns, url
 from myapp import views
 
 urlpatterns = patterns('',
-                       url(r'get_csv/',
-                           views.get_csv,
-                           name='get_csv'),
+                       url(r'get_accelerometer_csv/',
+                           views.get_accelerometer_csv,
+                           name='get_accelerometer_csv'),
                        url(r'^connection',
                            views.ConnectionView.as_view(),
                            name='connection'),

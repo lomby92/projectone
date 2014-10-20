@@ -1,40 +1,67 @@
 <!DOCTYPE html>
 <html>
-<head lang="en">
+<head lang="it">
     <meta charset="UTF-8">
     <title>Accelerometer</title>
+    {% load staticfiles %}
+    <script type="text/javascript" src="{% static "javascript/smoothie.js" %}"></script>
 </head>
 <body>
+    <canvas id="accelerometer_chart" width="1000" height="500"></canvas>
     <script type="text/javascript">
-        var xmlhttp = new XMLHttpRequest();
-        var url = "get_csv/";
+        var accelerometer_chart;
+        var x_time_series, y_time_series, z_time_series;
+        accelerometer_chart = new SmoothieChart();
+        accelerometer_chart.streamTo(document.getElementById("accelerometer_chart"), 50);
+        x_time_series = new TimeSeries();
+        y_time_series = new TimeSeries();
+        z_time_series = new TimeSeries();
+        accelerometer_chart.addTimeSeries(x_time_series,
+                {strokeStyle: 'rgba(0,255,0,1)',lineWidth: 4});
+        accelerometer_chart.addTimeSeries(y_time_series,
+                {strokeStyle: 'rgba(255,0,0,1)',lineWidth: 4});
+        accelerometer_chart.addTimeSeries(z_time_series,
+                {strokeStyle: 'rgba(0,0,255,1)',lineWidth: 4});
 
-        xmlhttp.onreadystatechange = function() {
-            var x_value, y_value, z_value, max_g;
-            if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-                try{
-                    var allText = xmlhttp.responseText;
-                    var arrayText = allText.split(",");
-                    console.log(arrayText.length)
-                    for(i=0;i<arrayText.length;i++){
-                        console.log(arrayText[i])
+        setInterval(getNewData,200);
+
+
+        function getNewData(){
+            var xmlhttp = new XMLHttpRequest();
+            var url = "get_accelerometer_csv/";
+
+            xmlhttp.onreadystatechange = function() {
+                var x_value, y_value, z_value, max_g;
+                if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                    try{
+                        var allText = xmlhttp.responseText;
+                        var arrayText = allText.split(",");
+                        x_value = arrayText[6];
+                        y_value = arrayText[7];
+                        z_value = arrayText[8];
+                    }catch(e){
+                        x_value = 0;
+                        y_value = 0;
+                        z_value = 0;
                     }
-                }catch(e){
-                    console.log(e);
+
+                    plotAccelerometerData(x_value, y_value, z_value);
                 }
-
-                //myFunction(x_value, y_value, z_value, max_g);
             }
+            xmlhttp.open("GET", url, true);
+            xmlhttp.send();
         }
-        xmlhttp.open("GET", url, true);
-        xmlhttp.send();
 
-        function myFunction(x, y, z, g) {
-            console.log(x);
-            console.log(y);
-            console.log(z);
-            console.log(g);
+        function plotAccelerometerData(x, y, z) {
+            x = parseFloat(x);
+            y = parseFloat(y);
+            z = parseFloat(z);
+            x_time_series.append(new Date().getTime(), x);
+            y_time_series.append(new Date().getTime(), y);
+            z_time_series.append(new Date().getTime(), z);
         }
+
+
     </script>
 </body>
 </html>
