@@ -4,7 +4,7 @@ import random
 from models import Accelerometer
 
 
-def create_accelerometer_value():
+def update_accelerometer_data():
     max_g = Accelerometer.objects.all()[1].max_g
     max_sensor = Accelerometer.MAX_VALUE_OF_SENSOR
     x = max_g*(random.randint(-max_sensor, max_sensor))/max_sensor

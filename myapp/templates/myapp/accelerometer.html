@@ -7,58 +7,67 @@
     <script type="text/javascript" src="{% static "javascript/smoothie.js" %}"></script>
 </head>
 <body>
+    <p>Legenda: X:green Y:red Z:black</p>
     <canvas id="accelerometer_chart" width="1000" height="500"></canvas>
     <script type="text/javascript">
+        //--------------------- define variables -------------------------
         var accelerometer_chart;
         var x_time_series, y_time_series, z_time_series;
-        accelerometer_chart = new SmoothieChart();
-        accelerometer_chart.streamTo(document.getElementById("accelerometer_chart"), 50);
+        //------------------------- create chart ---------------------------------
+        accelerometer_chart = new SmoothieChart({grid:
+                {verticalSections:20},
+                timestampFormatter:SmoothieChart.timeFormatter,
+                horizontalLines:[{color:'#ffffff',lineWidth:4,value:0},{color:'#AA0000',lineWidth:1,value:-1}]});
+        accelerometer_chart.streamTo(document.getElementById("accelerometer_chart"), 500);
+        //------------------------ add time series ----------------------------
         x_time_series = new TimeSeries();
         y_time_series = new TimeSeries();
         z_time_series = new TimeSeries();
         accelerometer_chart.addTimeSeries(x_time_series,
-                {strokeStyle: 'rgba(0,255,0,1)',lineWidth: 4});
+                {strokeStyle: 'rgba(0,255,0,1)',lineWidth: 5});
         accelerometer_chart.addTimeSeries(y_time_series,
-                {strokeStyle: 'rgba(255,0,0,1)',lineWidth: 4});
+                {strokeStyle: 'rgba(255,0,0,1)',lineWidth: 5});
         accelerometer_chart.addTimeSeries(z_time_series,
-                {strokeStyle: 'rgba(0,0,255,1)',lineWidth: 4});
+                {strokeStyle: 'rgba(0,0,255,1)',lineWidth: 5});
+        //---------------- define interval for repeat getNewData every 500ms -------------
+        setInterval(getNewData,500);
 
-        setInterval(getNewData,200);
-
-
+        //----------------------- define methods getNewData() ---------------------------
         function getNewData(){
             var xmlhttp = new XMLHttpRequest();
             var url = "get_accelerometer_csv/";
 
             xmlhttp.onreadystatechange = function() {
-                var x_value, y_value, z_value, max_g;
                 if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
                     try{
+                        var x_value, y_value, z_value, max_g, time_value;
                         var allText = xmlhttp.responseText;
                         var arrayText = allText.split(",");
-                        x_value = arrayText[6];
-                        y_value = arrayText[7];
-                        z_value = arrayText[8];
+                        time_value = arrayText[7];
+                        x_value = arrayText[8];
+                        y_value = arrayText[9];
+                        z_value = arrayText[10];
+                        plotAccelerometerData(x_value, y_value, z_value, time_value);
                     }catch(e){
-                        x_value = 0;
-                        y_value = 0;
-                        z_value = 0;
+                        //do-nothing
                     }
 
-                    plotAccelerometerData(x_value, y_value, z_value);
+
                 }
-            }
+            };
             xmlhttp.open("GET", url, true);
             xmlhttp.send();
         }
 
-        function plotAccelerometerData(x, y, z) {
+        function plotAccelerometerData(x, y, z, time_value) {
+            var date_value
             x = parseFloat(x);
             y = parseFloat(y);
             z = parseFloat(z);
-            x_time_series.append(new Date().getTime(), x);
-            y_time_series.append(new Date().getTime(), y);
-            z_time_series.append(new Date().getTime(), z);
+            date_value = new Date(time_value).getTime();
+            x_time_series.append(date_value, x);
+            y_time_series.append(date_value, y);
+            z_time_series.append(date_value, z);
         }
 
 
