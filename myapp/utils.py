@@ -1,26 +1,28 @@
 import djqscsv
-import random
 
+from connections import MAVlinkConnection
 from models import Accelerometer
 
 
-def update_accelerometer_data():
-    #Idea: read data by python class MAVlink_reader with methods: read_accelerometer
-    max_g = Accelerometer.objects.all()[1].max_g
-    max_sensor = Accelerometer.MAX_VALUE_OF_SENSOR
-    x = max_g*(random.randint(-max_sensor, max_sensor))/max_sensor
-    y = max_g*(random.randint(-max_sensor, max_sensor))/max_sensor
-    z = max_g*(random.randint(-max_sensor, max_sensor))/max_sensor
-    test = Accelerometer.objects.create(max_g=2, value_x=x,
-                                        value_y=y, value_z=z)
-    test.save()
+class UtilsManager():
 
+    def __init__(self):
+        self.mavlink_to_disconnect = False
 
-def save_csv():
-    try:
-        obj = Accelerometer.objects.all()
-        #last_set = Accelerometer.objects.order_by('-id')[1]
-        filecsv = open("accelerometer_csv.txt", "w")
-        djqscsv.write_csv(obj, filecsv)
-    except:
-        pass
+    def is_mavlink_to_disconnect(self):
+        return self.mavlink_to_disconnect
+
+    def update_and_save_accelerometer_data():
+        #to-do recognize max-g
+        value = Accelerometer.objects.create(max_g=2, value_x=x,
+                                             value_y=y, value_z=z)
+        value.save()
+
+    def save_csv(self):
+        try:
+            obj = Accelerometer.objects.all()
+            #last_set = Accelerometer.objects.order_by('-id')[1]
+            filecsv = open("accelerometer_csv.txt", "w")
+            djqscsv.write_csv(obj, filecsv)
+        except:
+            pass
