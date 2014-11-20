@@ -9,9 +9,11 @@ class MAVlinkConnection():
             self.port = port
             self.rate = baud_rate
             self.connected = True
+            self.work_frequency = 10
             self.serial_mav.wait_heartbeat()
         except Exception:
             self.serial_mav = None
+            self.work_frequency = 10
             self.port = None
             self.rate = None
             self.connected = False
@@ -19,6 +21,9 @@ class MAVlinkConnection():
     def send_message(self, message):
         #not implemented yet
         pass
+
+    def get_freq(self):
+        return self.work_frequency
 
     def read_accelerometer(self):
         if self.connected:

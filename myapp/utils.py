@@ -4,6 +4,8 @@ from connections import MAVlinkConnection
 from models import Accelerometer
 
 
+
+#------------------------ delete this class ----------------------
 class UtilsManager():
 
     def __init__(self):

@@ -5,6 +5,31 @@
     <title>Home</title>
 </head>
 <body>
-    <a href="connection.html">Connect</a>
+    <script type="text/javascript">
+
+        function startMAVConnection(){
+            var xmlhttp = new XMLHttpRequest();
+            var url = "start_mav_connection";
+            xmlhttp.onreadystatechange = function(){
+                if(xmlhttp.readyState==4 && xmlhttp.status==200){
+                    document.getElementById('status').textContent = "Connected to drone";
+                    //go to connection page
+                    window.location.href = "connection";
+                }else{
+                    document.getElementById('status').textContent = "Failed to connect";
+                }
+            };
+            xmlhttp.open("GET", url, true);
+            xmlhttp.send();
+        }
+
+    </script>
+    <p id="button_space">
+        <button onclick="startMAVConnection()">Connect to drone</button>
+        <button>Connect to test bench</button>
+    </p>
+    <p id="status_space">
+        <a id="status"></a>
+    </p>
 </body>
 </html>

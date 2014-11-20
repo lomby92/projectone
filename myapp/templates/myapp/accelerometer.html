@@ -1,76 +1,137 @@
 <!DOCTYPE html>
 <html>
-<head lang="it">
-    <meta charset="UTF-8">
-    <title>Accelerometer</title>
-    {% load staticfiles %}
-    <script type="text/javascript" src="{% static "javascript/smoothie.js" %}"></script>
-</head>
-<body>
-    <p>Legenda: X:green Y:red Z:blue</p>
-    <canvas id="accelerometer_chart" width="1000" height="500"></canvas>
-    <script type="text/javascript">
-        //--------------------- define variables -------------------------
-        var accelerometer_chart;
-        var x_time_series, y_time_series, z_time_series;
-        //------------------------- create chart ---------------------------------
-        accelerometer_chart = new SmoothieChart({grid:
-                {verticalSections:20},
-                timestampFormatter:SmoothieChart.timeFormatter,
-                horizontalLines:[{color:'#ffffff',lineWidth:4,value:0},{color:'#AA0000',lineWidth:1,value:-1}]});
-        accelerometer_chart.streamTo(document.getElementById("accelerometer_chart"), 500);
-        //------------------------ add time series ----------------------------
-        x_time_series = new TimeSeries();
-        y_time_series = new TimeSeries();
-        z_time_series = new TimeSeries();
-        accelerometer_chart.addTimeSeries(x_time_series,
-                {strokeStyle: 'rgba(0,255,0,1)',lineWidth: 5});
-        accelerometer_chart.addTimeSeries(y_time_series,
-                {strokeStyle: 'rgba(255,0,0,1)',lineWidth: 5});
-        accelerometer_chart.addTimeSeries(z_time_series,
-                {strokeStyle: 'rgba(0,0,255,1)',lineWidth: 5});
-        //---------------- define interval for repeat getNewData every 500ms -------------
-        setInterval(getNewData,500);
+	<head lang="it">
+		<meta charset="UTF-8">
+		<title>Accelerometer</title>
+        {% load staticfiles %}
+        <script type="text/javascript" src="{% static "javascript/jquery.min.js" %}"></script>
+		<script type="text/javascript" src="{% static "javascript/highcharts.js" %}"></script>
+        <script type="text/javascript" src="{% static "javascript/modules/exporting.js" %}"></script>
+	</head>
+	<body>
+		<p>
+			<p>Legend: X:green Y:red Z:blue</p>
+			<button type="button" id="playStopButton" onclick="playStop()">Play / Stop</button>
+	    </p>
+	    <div id="accelerometer_chart" style="width: 100%; height: 400px;"></div>
+        <script type="text/javascript">
+            //----------------------- define variables -----------------------------
+            var play_chart = false;
+            document.getElementById("playStopButton").innerHTML = "Play";
 
-        //----------------------- define methods getNewData() ---------------------------
-        function getNewData(){
-            var xmlhttp = new XMLHttpRequest();
-            var url = "get_accelerometer_csv/";
+            $(function () {
+                $(document).ready(function(){
+                    Highcharts.setOptions({
+                       global: {
+                           useUTC: false
+                       }
+                   });
 
-            xmlhttp.onreadystatechange = function() {
-                if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-                    try{
-                        var x_value, y_value, z_value, max_g, time_value;
-                        var allText = xmlhttp.responseText;
-                        var arrayText = allText.split(",");
-                        time_value = arrayText[7];
-                        x_value = arrayText[8];
-                        y_value = arrayText[9];
-                        z_value = arrayText[10];
-                        plotAccelerometerData(x_value, y_value, z_value, time_value);
-                    }catch(e){
-                        //do-nothing
-                    }
+                   $('#accelerometer_chart').highcharts({
+                      chart: {
+                          type: 'spline',
+                          animation: Highcharts.svg,
+                          marginRight: 10,
+                          events: {
+                              load: function(){
+                                  //define function called every 200 ms
+                                  var x_series = this.series[0];
+                                  var y_series = this.series[1];
+                                  var z_series = this.series[2];
+                                  setInterval(function(){
+                                      if(play_chart){
+                                            var xmlhttp = new XMLHttpRequest();
+                                            var url = "get_accelerometer/";
+
+                                            xmlhttp.onreadystatechange = function () {
+                                                if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                                                    try {
+                                                        var x_value, y_value, z_value, time_value;
+                                                        var allText = xmlhttp.responseText;
+                                                        allText = allText.slice(1,allText.length-1); // cut ] at end of string and [ at start
+                                                        //console.log(allText);
+                                                        var arrayText = allText.split(",");
+                                                        var time_mill = Number(arrayText[0]);
+                                                        time_value = (new Date(time_mill)).getTime();
+                                                        x_value = parseFloat(arrayText[1]);
+                                                        y_value = parseFloat(arrayText[2]);
+                                                        z_value = parseFloat(arrayText[3]);
+                                                        //console.log(time_value);
+                                                        x_series.addPoint([time_value.getTime(), x_value], true, true);
+                                                        y_series.addPoint([time_value.getTime(), y_value], true, true);
+                                                        z_series.addPoint([time_value.getTime(), z_value], true, true);
+                                                    } catch (e) {
+                                                        time_value = (new Date()).getTime();
+                                                        x_value = 0.7;
+                                                        y_value = -0.9;
+                                                        z_value = 0.2;
+                                                        x_series.addPoint([time_value, x_value], true, true);
+                                                        y_series.addPoint([time_value, y_value], true, true);
+                                                        z_series.addPoint([time_value, z_value], true, true);
+                                                    }
 
 
+                                                }
+                                            };
+                                            xmlhttp.open("GET", url, true);
+                                            xmlhttp.send();
+                                        }
+                                  },200);
+                              }
+                          }
+                      },
+                      xAxis: {
+                          type: 'datetime',
+                          tickPixelInterval: 500
+                      },
+                      yAxis: {
+                          title: {
+                              text: 'Values'
+                          },
+                          plotLines: [
+                              {value: 0, width:5, color: '#FF0000'},
+                          ]
+                      },
+                      tooltip: {
+                        formatter: function () {
+                            return '<b>' + this.series.name + '</b><br/>' +
+                            Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', this.x) + '<br/>' +
+                            Highcharts.numberFormat(this.y, 2);
+                        }
+                      },
+                      legend: {
+                          enabled: true
+                      },
+                      exporting: {
+                          enabled: true
+                      },
+                      series: [
+                          {
+                             name: 'X value',
+                             data: [[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]]
+                          },
+                          {
+                             name: 'Y value',
+                             data: [[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]]
+                          },
+                          {
+                             name: 'Z value',
+                             data: [[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]]
+                          },
+                      ]
+                   });
+                });
+            });
+
+            //define button function
+            function playStop(){
+                if(play_chart){
+                    document.getElementById("playStopButton").innerHTML = "Play";
+                }else{
+                    document.getElementById("playStopButton").innerHTML = "Stop";
                 }
-            };
-            xmlhttp.open("GET", url, true);
-            xmlhttp.send();
-        }
-
-        function plotAccelerometerData(x, y, z, time_value) {
-            var date_value;
-            x = parseFloat(x);
-            y = parseFloat(y);
-            z = parseFloat(z);
-            date_value = new Date(time_value).getTime();
-            x_time_series.append(date_value, x);
-            y_time_series.append(date_value, y);
-            z_time_series.append(date_value, z);
-        }
-
-
-    </script>
-</body>
+                play_chart = !play_chart;
+            }
+        </script>
+	</body>
 </html>

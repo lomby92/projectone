@@ -3,10 +3,14 @@
     <words>
       <w>ardupilot</w>
       <w>filecsv</w>
+      <w>highcharts</w>
+      <w>klass</w>
+      <w>kwds</w>
       <w>mavlink</w>
       <w>myapp</w>
       <w>onreadystatechange</w>
       <w>pixhawk</w>
+      <w>vlink</w>
       <w>xmlhttp</w>
     </words>
   </dictionary>
