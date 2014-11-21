@@ -21,8 +21,11 @@ class Manager(object):
         #-------------------- try to connect --------------------
         try:
             self.mav_connection = MAVlinkConnection('/dev/ttyACM0', 115200)
-            #connected
-            return 1
+            if self.mav_connection.is_connected():
+                return 1
+            else:
+                self.mav_connection = None
+                return 0
         except:
             self.mav_connection = None
             #unable to connect

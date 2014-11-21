@@ -1,6 +1,3 @@
-import djqscsv
-import thread
-
 from django.views import generic
 from django.http import HttpResponse
 
@@ -15,7 +12,8 @@ class AccelerometerView(generic.base.TemplateView):
 
 def get_accelerometer(request):
     value = Accelerometer.last_value()
-    return HttpResponse(str(value), content_type="text/plain")
+    value = str(value)
+    return HttpResponse(value, content_type="text/plain")
 
 
 class ConnectionView(generic.base.TemplateView):
@@ -28,10 +26,17 @@ class HomeView(generic.base.TemplateView):
     template_name = "myapp/home.html"
 
 
-def start_connection(request):
+def start_mav_connection(request):
     try:
-        thread.start_new_thread(Manager, ())
-        string = "OK"
+        val = Manager.get_instance().start_mav()
+        if val is 1:
+            string = "connected"
+        else:
+            string = "unable to connect"
     except:
-        string = "NOT CONNECTED"
+        string = "error on server"
     return HttpResponse(string, content_type="text/plain")
+
+
+def start_test_bench_connection(request):
+    pass

@@ -2,9 +2,9 @@ from django.conf.urls import patterns, url
 from myapp import views
 
 urlpatterns = patterns('',
-                       url(r'start_connection/',
-                           views.start_connection,
-                           name='start_connection'),
+                       url(r'start_mav_connection/',
+                           views.start_mav_connection,
+                           name='start_mav_connection'),
                        url(r'get_accelerometer/',
                            views.get_accelerometer,
                            name='get_accelerometer'),

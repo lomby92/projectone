@@ -11,12 +11,13 @@
             var xmlhttp = new XMLHttpRequest();
             var url = "start_mav_connection";
             xmlhttp.onreadystatechange = function(){
-                if(xmlhttp.readyState==4 && xmlhttp.status==200){
-                    document.getElementById('status').textContent = "Connected to drone";
+                console.log(xmlhttp.responseText);
+                if(xmlhttp.readyState==4 && xmlhttp.status==200 && xmlhttp.responseText=="connected" && false){
+                    document.getElementById('status').textContent = "Status: "+xmlhttp.responseText;
                     //go to connection page
                     window.location.href = "connection";
                 }else{
-                    document.getElementById('status').textContent = "Failed to connect";
+                    document.getElementById('status').textContent = "Status: "+xmlhttp.responseText;
                 }
             };
             xmlhttp.open("GET", url, true);

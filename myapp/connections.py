@@ -1,4 +1,5 @@
 from pymavlink import mavutil
+import serial
 
 
 class MAVlinkConnection():
@@ -25,6 +26,9 @@ class MAVlinkConnection():
     def get_freq(self):
         return self.work_frequency
 
+    def is_connected(self):
+        return self.connected
+
     def read_accelerometer(self):
         if self.connected:
             assert isinstance(self.serial_mav, object)
@@ -42,3 +46,44 @@ class MAVlinkConnection():
         if self.connected:
             assert isinstance(self.serial_mav, object)
             self.serial_mav.close()
+
+
+class TestBenchConnection():
+
+    def __init__(self, port, baud_rate):
+        try:
+            self.port = port
+            self.baud_rate = baud_rate
+            self.serial_test_bench = serial.Serial(port=self.port, baudrate=self.baud_rate)
+            self.connected = True
+            self.work_frequency = 10
+            #value to update
+            self.msg_length = 15
+        except:
+            self.serial_test_bench = None
+            self.work_frequency = 10
+            #value to update
+            self.msg_length = 15
+            self.port = None
+            self.rate = None
+            self.connected = False
+
+    def read_all_by_serial(self):
+        if self.connected:
+            assert isinstance(self.serial_test_bench, serial.Serial)
+            msg = self.serial_test_bench.read(self.msg_length)
+            #do something with msg
+            return msg
+        else:
+            return None
+
+    def get_freq(self):
+        return self.work_frequency
+
+    def is_connected(self):
+        return self.connected
+
+    def close(self):
+        if self.connected:
+            assert isinstance(self.serial_test_bench, serial.Serial)
+            self.serial_test_bench.close()

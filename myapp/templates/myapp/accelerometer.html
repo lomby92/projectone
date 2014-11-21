@@ -49,22 +49,19 @@
                                                         var x_value, y_value, z_value, time_value;
                                                         var allText = xmlhttp.responseText;
                                                         allText = allText.slice(1,allText.length-1); // cut ] at end of string and [ at start
-                                                        //console.log(allText);
                                                         var arrayText = allText.split(",");
-                                                        var time_mill = Number(arrayText[0]);
-                                                        time_value = (new Date(time_mill)).getTime();
+                                                        var time_millis = Number(arrayText[0]);
                                                         x_value = parseFloat(arrayText[1]);
                                                         y_value = parseFloat(arrayText[2]);
                                                         z_value = parseFloat(arrayText[3]);
-                                                        //console.log(time_value);
-                                                        x_series.addPoint([time_value.getTime(), x_value], true, true);
-                                                        y_series.addPoint([time_value.getTime(), y_value], true, true);
-                                                        z_series.addPoint([time_value.getTime(), z_value], true, true);
+                                                        x_series.addPoint([time_millis, x_value], true, true);
+                                                        y_series.addPoint([time_millis, y_value], true, true);
+                                                        z_series.addPoint([time_millis, z_value], true, true);
                                                     } catch (e) {
                                                         time_value = (new Date()).getTime();
-                                                        x_value = 0.7;
-                                                        y_value = -0.9;
-                                                        z_value = 0.2;
+                                                        x_value = 0.0;
+                                                        y_value = 0.0;
+                                                        z_value = 0.0;
                                                         x_series.addPoint([time_value, x_value], true, true);
                                                         y_series.addPoint([time_value, y_value], true, true);
                                                         z_series.addPoint([time_value, z_value], true, true);
@@ -82,7 +79,7 @@
                       },
                       xAxis: {
                           type: 'datetime',
-                          tickPixelInterval: 500
+                          tickPixelInterval: 50
                       },
                       yAxis: {
                           title: {
@@ -90,7 +87,8 @@
                           },
                           plotLines: [
                               {value: 0, width:5, color: '#FF0000'},
-                          ]
+                          ],
+                          tickPixelInterval: 20
                       },
                       tooltip: {
                         formatter: function () {
