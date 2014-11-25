@@ -50,16 +50,18 @@ class Manager(object):
         while not self.mav_is_to_disconnect:
             #read accelerometer:
             x, y, z = self.mav_connection.read_accelerometer()
-            Accelerometer.objects.create(value_x=x, value_y=y, value_z=z).save()
+            acc_value = Accelerometer.objects.create(value_x=x, value_y=y, value_z=z)
+            acc_value.save()
             #-----to do: add all sensors-----
-            time.sleep(self.mav_connection.get_freq())
-        self.stop_mav()
+            #time.sleep(1.0/self.mav_connection.get_freq())
+        self.mav_connection.close()
+        self.mav_is_to_disconnect = False
 
     def run_test_bench(self):
         pass
 
     def stop_mav(self):
-        self.mav_connection.close()
+        self.mav_is_to_disconnect = True
 
     def stop_test_bench(self):
         pass

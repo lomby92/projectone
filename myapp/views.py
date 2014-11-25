@@ -4,6 +4,8 @@ from django.http import HttpResponse
 from models import Accelerometer
 from manager import Manager
 
+import thread
+
 
 class AccelerometerView(generic.base.TemplateView):
 
@@ -31,11 +33,23 @@ def start_mav_connection(request):
         val = Manager.get_instance().start_mav()
         if val is 1:
             string = "connected"
+            thread.start_new_thread(Manager.get_instance().run_mav, ())
         else:
             string = "unable to connect"
     except:
         string = "error on server"
     return HttpResponse(string, content_type="text/plain")
+
+
+def close_mav_connection(request):
+    try:
+        Manager.get_instance().stop_mav()
+        return HttpResponse("closed", content_type="text/plain")
+    except:
+        pass
+        return HttpResponse("failed to close", content_type="text/plain")
+
+
 
 
 def start_test_bench_connection(request):

@@ -12,6 +12,7 @@
 		<p>
 			<p>Legend: X:green Y:red Z:blue</p>
 			<button type="button" id="playStopButton" onclick="playStop()">Play / Stop</button>
+            <button type="button" id="closeMAV" onclick="closeMAV()">Close MAV communication</button>
 	    </p>
 	    <div id="accelerometer_chart" style="width: 100%; height: 400px;"></div>
         <script type="text/javascript">
@@ -45,25 +46,28 @@
 
                                             xmlhttp.onreadystatechange = function () {
                                                 if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                                                    var x_value, y_value, z_value, time_value;
                                                     try {
-                                                        var x_value, y_value, z_value, time_value;
                                                         var allText = xmlhttp.responseText;
+                                                        console.log(allText);
                                                         allText = allText.slice(1,allText.length-1); // cut ] at end of string and [ at start
                                                         var arrayText = allText.split(",");
+                                                        console.log(arrayText[0]);
                                                         var time_millis = Number(arrayText[0]);
+                                                        console.log(time_millis);
                                                         x_value = parseFloat(arrayText[1]);
                                                         y_value = parseFloat(arrayText[2]);
                                                         z_value = parseFloat(arrayText[3]);
-                                                        x_series.addPoint([time_millis, x_value], true, true);
-                                                        y_series.addPoint([time_millis, y_value], true, true);
+                                                        x_series.addPoint([time_millis, x_value], false, true);
+                                                        y_series.addPoint([time_millis, y_value], false, true);
                                                         z_series.addPoint([time_millis, z_value], true, true);
                                                     } catch (e) {
                                                         time_value = (new Date()).getTime();
                                                         x_value = 0.0;
                                                         y_value = 0.0;
                                                         z_value = 0.0;
-                                                        x_series.addPoint([time_value, x_value], true, true);
-                                                        y_series.addPoint([time_value, y_value], true, true);
+                                                        x_series.addPoint([time_value, x_value], false, false);
+                                                        y_series.addPoint([time_value, y_value], false, false);
                                                         z_series.addPoint([time_value, z_value], true, true);
                                                     }
 
@@ -73,27 +77,27 @@
                                             xmlhttp.open("GET", url, true);
                                             xmlhttp.send();
                                         }
-                                  },200);
+                                  },500);
                               }
                           }
                       },
                       xAxis: {
                           type: 'datetime',
-                          tickPixelInterval: 50
+                          tickPixelInterval: 100
                       },
                       yAxis: {
                           title: {
                               text: 'Values'
                           },
                           plotLines: [
-                              {value: 0, width:5, color: '#FF0000'},
+                              {value: 0, width:2, color: '#FF0000'},
                           ],
                           tickPixelInterval: 20
                       },
                       tooltip: {
                         formatter: function () {
                             return '<b>' + this.series.name + '</b><br/>' +
-                            Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', this.x) + '<br/>' +
+                            Highcharts.dateFormat('%Y-%m-%d %H:%M:%S:%l', this.x) + '<br/>' +
                             Highcharts.numberFormat(this.y, 2);
                         }
                       },
@@ -106,15 +110,15 @@
                       series: [
                           {
                              name: 'X value',
-                             data: [[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]]
+                             data: [[0],[0],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]]
                           },
                           {
                              name: 'Y value',
-                             data: [[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]]
+                             data: [[0],[0],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]]
                           },
                           {
                              name: 'Z value',
-                             data: [[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]]
+                             data: [[0],[0],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]]
                           },
                       ]
                    });
@@ -129,6 +133,19 @@
                     document.getElementById("playStopButton").innerHTML = "Stop";
                 }
                 play_chart = !play_chart;
+            }
+
+            function closeMAV() {
+                var xmlhttp = new XMLHttpRequest();
+                var url = "close_mav_connection";
+                xmlhttp.onreadystatechange = function () {
+                    if (xmlhttp.readyState == 4 && xmlhttp.status == 200 && xmlhttp.responseText == "closed") {
+                        console.log(xmlhttp.responseText);
+                        window.location.href = "/myapp";
+                    }
+                };
+                xmlhttp.open("GET", url, true);
+                xmlhttp.send();
             }
         </script>
 	</body>
