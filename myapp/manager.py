@@ -1,7 +1,5 @@
-import time
-
 from connections import MAVlinkConnection
-from models import Accelerometer
+from models import Accelerometer, Gyroscope, Magnetometer, Attitude
 
 
 class Manager(object):
@@ -48,11 +46,24 @@ class Manager(object):
 
     def run_mav(self):
         while not self.mav_is_to_disconnect:
-            #read accelerometer:
-            x, y, z = self.mav_connection.read_accelerometer()
-            acc_value = Accelerometer.objects.create(value_x=x, value_y=y, value_z=z)
+            #read imu:
+            xa, ya, za, xg, yg, zg, xm, ym, zm = self.mav_connection.read_raw_imu()
+            acc_value = Accelerometer.objects.create(value_x=xa, value_y=ya, value_z=za)
+            gyro_value = Gyroscope.objects.create(value_x=xg, value_y=yg, value_z=zg)
+            magn_value = Magnetometer.objects.create(value_x=xm, value_y=ym, value_z=zm)
+            #read attitude
+            roll, pitch, yaw, rollspeed, pitchspeed, yawspeed = self.mav_connection.read_attitude()
+            attitude_value = Attitude.objects.create(roll=roll, pitch=pitch, yaw=yaw)
+            #read gps
+
+            #read pressure
+
+            #save values
             acc_value.save()
-            #-----to do: add all sensors-----
+            gyro_value.save()
+            magn_value.save()
+            attitude_value.save()
+
             #time.sleep(1.0/self.mav_connection.get_freq())
         self.mav_connection.close()
         self.mav_is_to_disconnect = False

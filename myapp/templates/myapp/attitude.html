@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+	<head lang="it">
+		<meta charset="UTF-8">
+		<title>Attitude</title>
+        {% load staticfiles %}
+        <script type="text/javascript" src="{% static "javascript/jquery.min.js" %}"></script>
+	</head>
+	<body>
+		<p>
+			<button type="button" id="playStopButton" onclick="playStop()">Play / Stop</button>
+            <button type="button" id="closeMAV" onclick="closeMAV()">Close MAV communication</button>
+	    </p>
+	    <canvas id="attitude_draw_area" style="width: 100%; height: 400px;"></canvas>
+        <script type="text/javascript">
+            //----------------------- define variables -----------------------------
+            var play_chart = false;
+            var values;
+
+            document.getElementById("playStopButton").innerHTML = "Play";
+
+            //define button function
+            function playStop(){
+                if(play_chart){
+                    document.getElementById("playStopButton").innerHTML = "Play";
+                }else{
+                    document.getElementById("playStopButton").innerHTML = "Stop";
+                }
+                play_chart = !play_chart;
+            }
+
+            function closeMAV() {
+                var xmlhttp = new XMLHttpRequest();
+                var url = "close_mav_connection";
+                xmlhttp.onreadystatechange = function () {
+                    if (xmlhttp.readyState == 4 && xmlhttp.status == 200 && xmlhttp.responseText == "closed") {
+                        console.log(xmlhttp.responseText);
+                        window.location.href = "/myapp";
+                    }
+                };
+                xmlhttp.open("GET", url, true);
+                xmlhttp.send();
+            }
+
+            //------------------ get Attitude values ----------------------
+            getAttitude = function (){
+                var xmlhttp = new XMLHttpRequest();
+                var url = "get_attitude/";
+
+                xmlhttp.onreadystatechange = function () {
+                    if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                        try {
+                            var allText = xmlhttp.responseText;
+                            console.log(allText);
+                            allText = allText.slice(1,allText.length-1); // cut ] at end of string and [ at start
+                            var arrayText = allText.split(",");
+                            //console.log(arrayText[0]);
+                            var time_millis = Number(arrayText[0]);
+                            //console.log(time_millis);
+                            values = [time_millis, parseFloat(arrayText[1]), parseFloat(arrayText[2]), parseFloat(arrayText[3])];
+                        } catch (e) {
+                             values = [0, 0, 0, 0];
+                        }
+                    }
+                };
+                xmlhttp.open("GET", url, true);
+                xmlhttp.send();
+                return values;
+            };
+
+
+            //-------- init draw area --------
+            initDraw = function (){
+                g2d.fillStyle = "#000000";
+                g2d.fillRect(0, 0, can.width, can.height);
+            };
+            //-------- update draw area ------
+            updateDrawArea = function (){
+                if(play_chart) {
+                    console.log("Entered on main function");
+                    g2d.clearRect(0, 0, can.width, can.height);
+                    values = getAttitude();
+                    //draw background
+                    g2d.fillStyle = "#6699FF";
+                    g2d.fillRect(0, 0, can.width, can.height);
+                    // ---something here
+                    //draw time
+                    //draw speeds
+                    var angle_roll = values[1];
+                    var angle_pitch = values[2];
+                    var angle_yaw = values[3];
+                    drawRollArea(angle_roll);
+                    drawPitchArea(angle_roll, angle_pitch);
+                    drawYawArea(angle_yaw);
+                }
+            };
+            //-------- draw roll area --------
+            drawRollArea = function (angle){
+                g2d.fillStyle = "#33CC33";
+                g2d.beginPath();
+                var r = Math.sqrt(can.width*can.width + can.height*can.height);
+                g2d.arc(can.width/2, can.height/2, r, angle, angle+Math.PI);
+                g2d.closePath();
+                g2d.fill();
+            };
+            //-------- draw pitch area -------
+            drawPitchArea = function (roll_angle, angle){
+                g2d.save();
+                g2d.translate(can.width/2, can.height/2);
+                g2d.fillStyle = "#000000";
+                g2d.rotate(roll_angle);
+                //draw lines on screen
+                for(var i=-6; i<=6; i++){
+                    g2d.beginPath();
+                    g2d.moveTo(-15, 15*i);
+                    g2d.lineTo(15, 15*i);
+                    g2d.closePath();
+                    g2d.stroke();
+                }
+                var angle_grad = parseInt(angle*180/Math.PI);
+                g2d.font="16px Verdana";
+                g2d.fillText(angle_grad.toString()+"°", 16, 0, 20);
+                g2d.restore();
+            };
+            //-------- draw yaw area ---------
+            drawYawArea = function (angle){
+                //draw black lines
+                g2d.fillStyle = "#000000";
+                for(var i=1; i<=23; i++){
+                    g2d.fillRect(i*can.width/24-1, 0, 2, 5);
+                }
+                //draw red lines with coordinates NESW
+                g2d.fillStyle = "#FF0000";
+                g2d.fillRect(0, 0, 2, 7);
+                g2d.fillText("S", 0, 17, 10);
+                g2d.fillRect(can.width/4-2, 0, 4, 7);
+                g2d.fillText("W", can.width/4-4, 17, 10);
+                g2d.fillRect(can.width/2-2, 0, 4, 7);
+                g2d.fillText("N", can.width/2-4, 17, 10);
+                g2d.fillRect(3*can.width/4-2, 0, 4, 7);
+                g2d.fillText("E", 3*can.width/4-3, 17, 0);
+                g2d.fillRect(can.width-2, 0, 4, 7);
+                g2d.fillText("S", can.width-6, 17, 10);
+                //draw cursor for yaw_angle
+                g2d.fillStyle = "#00327D";
+                g2d.beginPath();
+                var x_cursor =(1+angle/Math.PI)*can.width/2;
+                g2d.moveTo(x_cursor-4, 0);
+                g2d.lineTo(x_cursor+4, 0);
+                g2d.lineTo(x_cursor+4, 6);
+                g2d.lineTo(x_cursor, 11);
+                g2d.lineTo(x_cursor-4, 6);
+                g2d.lineTo(x_cursor-4, 0);
+                g2d.closePath();
+                g2d.fill();
+            };
+
+            //--------------------------------------------------------------------------
+            //         draw attitude area
+            var can = document.getElementById("attitude_draw_area");
+            var g2d = can.getContext("2d");
+            initDraw();
+            setInterval(updateDrawArea,1000);
+
+            //--------------------------- end canvas editing -------------------------------
+        </script>
+	</body>
+</html>

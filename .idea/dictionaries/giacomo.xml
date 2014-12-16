@@ -2,14 +2,17 @@
   <dictionary name="giacomo">
     <words>
       <w>ardupilot</w>
+      <w>backends</w>
       <w>filecsv</w>
       <w>highcharts</w>
       <w>klass</w>
       <w>kwds</w>
+      <w>magn</w>
       <w>mavlink</w>
       <w>myapp</w>
       <w>onreadystatechange</w>
       <w>pixhawk</w>
+      <w>sqlite</w>
       <w>vlink</w>
       <w>xmlhttp</w>
     </words>
