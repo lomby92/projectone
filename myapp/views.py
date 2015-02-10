@@ -3,6 +3,7 @@ from django.http import HttpResponse
 
 from models import Accelerometer, Gyroscope, Magnetometer, Attitude
 from manager import Manager
+from datetime import datetime
 
 import thread
 
@@ -14,7 +15,13 @@ class AccelerometerView(generic.base.TemplateView):
 
 def get_accelerometer(request):
     try:
-        value = Accelerometer.last_value()
+        Manager.get_instance().get_lock().acquire()
+        xa = Manager.get_instance().get_shared_data('xa')
+        ya = Manager.get_instance().get_shared_data('ya')
+        za = Manager.get_instance().get_shared_data('za')
+        t = float(datetime.now().strftime('%Y%m%d%H%M%S%f')[:-3])
+        value = [t, xa, ya, za]
+        Manager.get_instance().get_lock().release()
     except:
         return HttpResponse("", content_type="text/plain")
     value = str(value)
@@ -82,7 +89,6 @@ def close_mav_connection(request):
         Manager.get_instance().stop_mav()
         return HttpResponse("closed", content_type="text/plain")
     except:
-        pass
         return HttpResponse("failed to close", content_type="text/plain")
 
 

@@ -15,7 +15,7 @@
         <script type="text/javascript">
             //----------------------- define variables -----------------------------
             var play_chart = false;
-            var values;
+            var values = [];
 
             document.getElementById("playStopButton").innerHTML = "Play";
 
@@ -77,7 +77,7 @@
             //-------- update draw area ------
             updateDrawArea = function (){
                 if(play_chart) {
-                    console.log("Entered on main function");
+                    //console.log("Entered on main function");
                     g2d.clearRect(0, 0, can.width, can.height);
                     values = getAttitude();
                     //draw background

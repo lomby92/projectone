@@ -12,12 +12,17 @@
             var url = "start_mav_connection";
             xmlhttp.onreadystatechange = function(){
                 console.log(xmlhttp.responseText);
-                if(xmlhttp.readyState==4 && xmlhttp.status==200 && xmlhttp.responseText=="connected"){
-                    document.getElementById('status').textContent = "Status: "+xmlhttp.responseText;
-                    //go to connection page
-                    window.location.href = "connection";
+                if(xmlhttp.readyState==4 && xmlhttp.status==200){
+                    if(xmlhttp.responseText=="connected"){
+                        document.getElementById('status').textContent = "Status: "+xmlhttp.responseText;
+                        //go to connection page
+                        window.location.href = "connection";
+                    }else{
+                        document.getElementById('status').textContent = "Status: "+xmlhttp.responseText;
+                        window.location.href = "";
+                    }
                 }else{
-                    document.getElementById('status').textContent = "Status: "+xmlhttp.responseText;
+                    window.location.href = "";
                 }
             };
             xmlhttp.open("GET", url, true);
