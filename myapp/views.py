@@ -73,9 +73,11 @@ class HomeView(generic.base.TemplateView):
 
 def start_mav_connection(request):
     try:
+        #try to connect to drone via mavlink
         val = Manager.get_instance().start_mav()
         if val is 1:
             string = "connected"
+            #starting continuous method for get data
             thread.start_new_thread(Manager.get_instance().run_mav, ())
         else:
             string = "unable to connect"
@@ -93,10 +95,9 @@ def close_mav_connection(request):
 
 
 def mav_connection_status(request):
-    if Manager.get_instance().mav_connection.connected:
+    if Manager.get_instance().is_mav_connected():
         return HttpResponse("OK", content_type="text/plain")
-    else:
-        return HttpResponse("closed", content_type="text/plain")
+    return HttpResponse("closed", content_type="text/plain")
 
 
 def start_test_bench_connection(request):

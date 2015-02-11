@@ -3,22 +3,58 @@
 <head lang="en">
     <meta charset="UTF-8">
     <title>Home</title>
+    <style type="text/css">
+        .button_space{
+            margin-top: 50px;
+        }
+        .button {
+            background: #3498db;
+            border-radius: 36px;
+            text-shadow: 1px 1px 6px #666666;
+            color: #ffffff;
+            font-size: 30px;
+            padding: 10px 20px 10px 20px;
+            text-decoration: none;
+        }
+        body {
+            background-image: url(/myapp/static/images/home_background.jpg);
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: 0px -150px;
+        }
+    </style>
+    <script>
+        //-----------Check if mavlink is connected. Case true: skip to chose connection page
+        var xmlhttp = new XMLHttpRequest();
+            var url = "mav_connection_status/";
+            xmlhttp.onreadystatechange = function(){
+                if(xmlhttp.readyState==4 && xmlhttp.status==200) {
+                    if (xmlhttp.responseText == "OK") {
+                        //go to connection page
+                        window.location.href = "connection";
+                    }
+                }
+            };
+            xmlhttp.open("GET", url, true);
+            xmlhttp.send();
+    </script>
 </head>
 <body>
     <script type="text/javascript">
 
         function startMAVConnection(){
             var xmlhttp = new XMLHttpRequest();
-            var url = "start_mav_connection";
+            var url = "start_mav_connection/";
             xmlhttp.onreadystatechange = function(){
-                console.log(xmlhttp.responseText);
                 if(xmlhttp.readyState==4 && xmlhttp.status==200){
                     if(xmlhttp.responseText=="connected"){
                         document.getElementById('status').textContent = "Status: "+xmlhttp.responseText;
+                        console.log(xmlhttp.responseText);
                         //go to connection page
                         window.location.href = "connection";
                     }else{
                         document.getElementById('status').textContent = "Status: "+xmlhttp.responseText;
+                        console.log(xmlhttp.responseText);
                         window.location.href = "";
                     }
                 }else{
@@ -30,12 +66,12 @@
         }
 
     </script>
-    <p id="button_space">
-        <button onclick="startMAVConnection()">Connect to drone</button>
-        <button>Connect to test bench</button>
-    </p>
-    <p id="status_space">
+    <div class="button_space" align="center" >
+        <button class="button" id="mav_button" onclick="startMAVConnection()">Connect to drone</button>
+        <button class="button" id="bench_button">Connect to test bench</button>
+    </div>
+    <div id="status_space">
         <a id="status"></a>
-    </p>
+    </div>
 </body>
 </html>

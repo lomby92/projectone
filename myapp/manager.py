@@ -18,6 +18,9 @@ class Manager(object):
         return cls.__manager_instance
 
     def __init__(self):
+        #define variable
+        self.mav_connection = None
+        self.mav_is_to_disconnect = None
         #define lock for external access to fast_access_data
         self.lock = Lock()
         #define dictionary for last data to stream
@@ -112,6 +115,7 @@ class Manager(object):
 
             #time.sleep(0.5)
         self.mav_connection.close()
+        self.mav_connection = None
         self.mav_is_to_disconnect = False
 
     def run_test_bench(self):
@@ -123,3 +127,9 @@ class Manager(object):
     def stop_test_bench(self):
         pass
         self.test_bench_connection.close()
+
+    def is_mav_connected(self):
+        #if mav_connection is None then mav is not connected
+        if self.mav_connection is None:
+            return False
+        return True
