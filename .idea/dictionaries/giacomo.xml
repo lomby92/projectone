@@ -11,10 +11,13 @@
       <w>mavlink</w>
       <w>myapp</w>
       <w>onreadystatechange</w>
+      <w>pitchspeed</w>
       <w>pixhawk</w>
+      <w>rollspeed</w>
       <w>sqlite</w>
       <w>vlink</w>
       <w>xmlhttp</w>
+      <w>yawspeed</w>
     </words>
   </dictionary>
 </component>

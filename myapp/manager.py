@@ -1,6 +1,7 @@
 from connections import MAVlinkConnection
 from models import Accelerometer, Gyroscope, Magnetometer, Attitude
 from threading import Lock
+import time
 
 
 class Manager(object):
@@ -18,39 +19,40 @@ class Manager(object):
         return cls.__manager_instance
 
     def __init__(self):
-        #define variable
+        #define variables for connections
         self.mav_connection = None
+        self.test_bench_connection = None
         self.mav_is_to_disconnect = None
+        self.test_bench_is_to_disconnect = None
         #define lock for external access to fast_access_data
         self.lock = Lock()
         #define dictionary for last data to stream
         self.fast_access_data = {}
-
-    def get_lock(self):
-        return self.__lock
+        #--------------------------testing---------------------------
+        print "Ho finito la fase di init del Manager"
 
     def get_shared_data(self, key):
-        #to access here, external class must use get_lock before
+        value = None
+        self.lock.acquire()
         if key in self.__fast_access_data:
-            return self.__fast_access_data[key]
-        return None
+            value = self.__fast_access_data[key]
+        self.lock.release()
+        return value
 
     def start_mav(self):
-        #-------------------- define variables --------------------
-        self.mav_connection = None
-        self.mav_is_to_disconnect = False
         #-------------------- try to connect --------------------
         try:
-            self.mav_connection = MAVlinkConnection('/dev/ttyACM0', 115200)
+            #setting device and baudrate (in accordance of http://copter.ardupilot.com/wiki/common-using-the-3dr-radio-for-telemetry-with-apm-and-px4/)
+            self.mav_connection = MAVlinkConnection('/dev/ttyACM0', 57600)
             if self.mav_connection.is_connected():
-                return 1
+                return True
             else:
                 self.mav_connection = None
-                return 0
+                return False
         except:
             self.mav_connection = None
             #unable to connect
-            return 0
+            return False
 
     # start_test_bench is incomplete
     def start_test_bench(self):
@@ -61,14 +63,16 @@ class Manager(object):
         try:
             #self.test_bench_connection = TestBenchConnection('', 0)
             #connected
-            return 1
+            return True
         except:
             self.test_bench_connection = None
             #unable to connect
-            return 0
+            return False
 
     def run_mav(self):
+        print "Sono entrato nel run_mav"
         while not self.mav_is_to_disconnect:
+            print "Ciclo il run_mav"
             #xa is x data of accelerometer, xg is x data of gyroscope and xm is for magnetometer
 
             #read imu:
@@ -83,25 +87,6 @@ class Manager(object):
             #read pressure
             #------ to do
 
-            #update last data in fast_access_data dictionary (first of all get the lock!)
-            self.get_lock().acquire()
-            self.__fast_access_data['xa'] = xa
-            self.__fast_access_data['ya'] = ya
-            self.__fast_access_data['za'] = za
-            self.__fast_access_data['xg'] = xg
-            self.__fast_access_data['yg'] = yg
-            self.__fast_access_data['zg'] = zg
-            self.__fast_access_data['xm'] = xm
-            self.__fast_access_data['ym'] = ym
-            self.__fast_access_data['zm'] = zm
-            self.__fast_access_data['roll'] = roll
-            self.__fast_access_data['pitch'] = pitch
-            self.__fast_access_data['yaw'] = yaw
-            self.__fast_access_data['rollspeed'] = rollspeed
-            self.__fast_access_data['pitchspeed'] = pitchspeed
-            self.__fast_access_data['yawspeed'] = yawspeed
-            self.get_lock().release()
-
             #creating database objects
             acc_value = Accelerometer.objects.create(value_x=xa, value_y=ya, value_z=za)
             gyro_value = Gyroscope.objects.create(value_x=xg, value_y=yg, value_z=zg)
@@ -112,8 +97,9 @@ class Manager(object):
             gyro_value.save()
             magn_value.save()
             attitude_value.save()
+            #sleep for half second
+            time.sleep(0.5)
 
-            #time.sleep(0.5)
         self.mav_connection.close()
         self.mav_connection = None
         self.mav_is_to_disconnect = False

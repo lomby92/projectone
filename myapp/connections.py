@@ -31,8 +31,8 @@ class MAVlinkConnection():
 
     def read_raw_imu(self):
         if self.connected:
-            assert isinstance(self.serial_mav, object)
             msg = self.serial_mav.recv_match(type="RAW_IMU", blocking=True)
+            print "Message imu, received:"+str(msg)
             x_acc = msg.xacc/1000.0
             y_acc = msg.yacc/1000.0
             z_acc = msg.zacc/1000.0
@@ -42,8 +42,9 @@ class MAVlinkConnection():
             x_mag = msg.xmag/1000.0
             y_mag = msg.ymag/1000.0
             z_mag = msg.zmag/1000.0
+            print "Reading IMU successfully"
         else:
-            x_acc = 0.0
+            x_acc = 0.01
             y_acc = 0.0
             z_acc = -1.0
             x_gyro = 0.0
@@ -56,14 +57,15 @@ class MAVlinkConnection():
 
     def read_attitude(self):
         if self.connected:
-            assert isinstance(self.serial_mav, object)
             msg = self.serial_mav.recv_match(type="ATTITUDE", blocking=True)
+            print "Message attitude, received:"+str(msg)
             r = msg.roll
             p = msg.pitch
             y = msg.yaw
             r_s = msg.rollspeed
             p_s = msg.pitchspeed
             y_s = msg.yawspeed
+            print "Reading attitude successfully"
         else:
             r = 0
             p = 0

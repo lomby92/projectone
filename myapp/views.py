@@ -3,7 +3,6 @@ from django.http import HttpResponse
 
 from models import Accelerometer, Gyroscope, Magnetometer, Attitude
 from manager import Manager
-from datetime import datetime
 
 import thread
 
@@ -14,17 +13,9 @@ class AccelerometerView(generic.base.TemplateView):
 
 
 def get_accelerometer(request):
-    try:
-        Manager.get_instance().get_lock().acquire()
-        xa = Manager.get_instance().get_shared_data('xa')
-        ya = Manager.get_instance().get_shared_data('ya')
-        za = Manager.get_instance().get_shared_data('za')
-        t = float(datetime.now().strftime('%Y%m%d%H%M%S%f')[:-3])
-        value = [t, xa, ya, za]
-        Manager.get_instance().get_lock().release()
-    except:
-        return HttpResponse("", content_type="text/plain")
+    value = Accelerometer.last_value()
     value = str(value)
+    print "Acc answer: "+value
     return HttpResponse(value, content_type="text/plain")
 
 
@@ -36,6 +27,7 @@ class GyroscopeView(generic.base.TemplateView):
 def get_gyroscope(request):
     value = Gyroscope.last_value()
     value = str(value)
+    print "Gyro answer: "+value
     return HttpResponse(value, content_type="text/plain")
 
 
@@ -58,6 +50,7 @@ class AttitudeView(generic.base.TemplateView):
 def get_attitude(request):
     value = Attitude.last_value()
     value = str(value)
+    print "Attitude: "+value
     return HttpResponse(value, content_type="text/plain")
 
 
@@ -74,8 +67,9 @@ class HomeView(generic.base.TemplateView):
 def start_mav_connection(request):
     try:
         #try to connect to drone via mavlink
-        val = Manager.get_instance().start_mav()
-        if val is 1:
+        ready = Manager.get_instance().start_mav()
+        #return true if mavlink connection is ready
+        if ready:
             string = "connected"
             #starting continuous method for get data
             thread.start_new_thread(Manager.get_instance().run_mav, ())

@@ -3,6 +3,22 @@
 <head lang="en">
     <meta charset="UTF-8">
     <title>Connection</title>
+    <script type="text/javascript">
+        setInterval(function (){
+            //-----------Check if mavlink is connected. Case true: back to home page
+            var xmlhttp = new XMLHttpRequest();
+                var url = "mav_connection_status/";
+                xmlhttp.onreadystatechange = function(){
+                    if(xmlhttp.readyState==4 && xmlhttp.status==200) {
+                        if (xmlhttp.responseText == "closed") {
+                            window.location.href = "/myapp/"
+                        }
+                    }
+                };
+                xmlhttp.open("GET", url, true);
+                xmlhttp.send();
+        },1000)
+    </script>
 </head>
 <body>
     <ul>

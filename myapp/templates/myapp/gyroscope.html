@@ -48,7 +48,7 @@
                                                     var x_value, y_value, z_value, time_value;
                                                     try {
                                                         var allText = xmlhttp.responseText;
-                                                        //console.log(allText);
+                                                        console.log(allText);
                                                         allText = allText.slice(1,allText.length-1); // cut ] at end of string and [ at start
                                                         var arrayText = allText.split(",");
                                                         //console.log(arrayText[0]);
@@ -60,6 +60,7 @@
                                                         x_series.addPoint([time_millis, x_value], true, true);
                                                         y_series.addPoint([time_millis, y_value], true, true);
                                                         z_series.addPoint([time_millis, z_value], true, true);
+                                                        console.log("Points added");
                                                     } catch (e) {
                                                         time_value = (new Date()).getTime();
                                                         x_value = 0.0;
@@ -136,11 +137,11 @@
 
             function closeMAV() {
                 var xmlhttp = new XMLHttpRequest();
-                var url = "close_mav_connection";
+                var url = "close_mav_connection/";
                 xmlhttp.onreadystatechange = function () {
                     if (xmlhttp.readyState == 4 && xmlhttp.status == 200 && xmlhttp.responseText == "closed") {
                         console.log(xmlhttp.responseText);
-                        window.location.href = "/myapp";
+                        window.location.href = "/myapp/";
                     }
                 };
                 xmlhttp.open("GET", url, true);

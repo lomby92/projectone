@@ -136,11 +136,11 @@
 
             function closeMAV() {
                 var xmlhttp = new XMLHttpRequest();
-                var url = "close_mav_connection";
+                var url = "close_mav_connection/";
                 xmlhttp.onreadystatechange = function () {
                     if (xmlhttp.readyState == 4 && xmlhttp.status == 200 && xmlhttp.responseText == "closed") {
                         console.log(xmlhttp.responseText);
-                        window.location.href = "/myapp";
+                        window.location.href = "/myapp/";
                     }
                 };
                 xmlhttp.open("GET", url, true);
