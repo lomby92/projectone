@@ -8,9 +8,6 @@ class Manager(object):
 
     __manager_instance = None
 
-    __fast_access_data = None
-    __lock = None
-
     @classmethod
     def get_instance(cls):
         if cls.__manager_instance is None:
@@ -31,18 +28,11 @@ class Manager(object):
         #--------------------------testing---------------------------
         print "Ho finito la fase di init del Manager"
 
-    def get_shared_data(self, key):
-        value = None
-        self.lock.acquire()
-        if key in self.__fast_access_data:
-            value = self.__fast_access_data[key]
-        self.lock.release()
-        return value
-
     def start_mav(self):
         #-------------------- try to connect --------------------
         try:
-            #setting device and baudrate (in accordance of http://copter.ardupilot.com/wiki/common-using-the-3dr-radio-for-telemetry-with-apm-and-px4/)
+            #setting device and baudrate (in accordance of
+            # http://copter.ardupilot.com/wiki/common-using-the-3dr-radio-for-telemetry-with-apm-and-px4/)
             self.mav_connection = MAVlinkConnection('/dev/ttyACM0', 57600)
             if self.mav_connection.is_connected():
                 return True
